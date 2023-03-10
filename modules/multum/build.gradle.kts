@@ -3,15 +3,18 @@ val kotlin_version: String by project
 val logback_version: String by project
 val prometeus_version: String by project
 val tcnative_version: String by project
+val koin_version: String by project
+val koin_ktor_version: String by project
+val koin_ksp_version: String by project
+val caffeine_version: String by project
 
 plugins {
     kotlin("jvm") version "1.8.10"
     id("io.ktor.plugin") version "2.2.4"
     id("org.jetbrains.kotlin.plugin.serialization") version "1.8.10"
+    id("com.google.devtools.ksp") version "1.8.10-1.0.9"
 }
 
-group = "pl.felis"
-version = "0.0.1"
 application {
     mainClass.set("io.ktor.server.netty.EngineMain")
 
@@ -33,13 +36,15 @@ val tcnative_classifier = when {
 
 dependencies {
     implementation("io.ktor:ktor-server-core-jvm:$ktor_version")
+    implementation("io.ktor:ktor-client-core:$ktor_version")
+    implementation("io.ktor:ktor-client-jetty:$ktor_version")
+    implementation("io.ktor:ktor-client-content-negotiation:$ktor_version")
     implementation("io.ktor:ktor-server-resources:$ktor_version")
     implementation("io.ktor:ktor-server-host-common-jvm:$ktor_version")
     implementation("io.ktor:ktor-server-status-pages-jvm:$ktor_version")
     implementation("io.ktor:ktor-server-caching-headers-jvm:$ktor_version")
     implementation("io.ktor:ktor-server-compression-jvm:$ktor_version")
     implementation("io.ktor:ktor-server-default-headers-jvm:$ktor_version")
-    implementation("io.ktor:ktor-server-forwarded-header-jvm:$ktor_version")
     implementation("io.ktor:ktor-server-openapi:$ktor_version")
     implementation("io.ktor:ktor-server-swagger:$ktor_version")
     implementation("io.ktor:ktor-server-call-logging-jvm:$ktor_version")
@@ -59,6 +64,21 @@ dependencies {
         implementation("io.netty:netty-tcnative-boringssl-static:$tcnative_version")
     }
 
+    implementation("io.insert-koin:koin-core:$koin_version")
+    implementation("io.insert-koin:koin-ktor:$koin_ktor_version")
+    implementation("io.insert-koin:koin-annotations:$koin_ksp_version")
+    implementation("io.insert-koin:koin-logger-slf4j:$koin_ktor_version")
+
+    implementation("com.github.ben-manes.caffeine:caffeine:$caffeine_version")
+
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
+
     testImplementation("io.ktor:ktor-server-tests-jvm:$ktor_version")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
+
+    ksp("io.insert-koin:koin-ksp-compiler:$koin_ksp_version")
+}
+
+sourceSets.main {
+    java.srcDirs("build/generated/ksp/main/kotlin")
 }

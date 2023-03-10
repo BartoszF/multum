@@ -1,4 +1,4 @@
-package pl.felis.plugins
+package pl.felis.multum.plugins
 
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
