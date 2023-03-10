@@ -1,4 +1,4 @@
-package pl.felis.plugins
+package pl.felis.multum.plugins
 
 import io.ktor.http.*
 import io.ktor.http.content.*
@@ -6,10 +6,6 @@ import io.ktor.server.application.*
 import io.ktor.server.plugins.cachingheaders.*
 import io.ktor.server.plugins.compression.*
 import io.ktor.server.plugins.defaultheaders.*
-import io.ktor.server.plugins.forwardedheaders.*
-import io.ktor.server.plugins.openapi.*
-import io.ktor.server.plugins.swagger.*
-import io.ktor.server.routing.*
 
 fun Application.configureHTTP() {
     install(CachingHeaders) {
@@ -32,8 +28,6 @@ fun Application.configureHTTP() {
     install(DefaultHeaders) {
         header("X-Engine", "Multum") // will send this header with each response
     }
-    install(ForwardedHeaders) // WARNING: for security, do not include this if not behind a reverse proxy
-    install(XForwardedHeaders) // WARNING: for security, do not include this if not behind a reverse proxy
 //    routing {
 //        openAPI(path = "openapi")
 //    }
