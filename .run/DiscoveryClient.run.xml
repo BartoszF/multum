@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="DiscoveryClient" type="JetRunConfigurationType">
+    <option name="MAIN_CLASS_NAME" value="pl.felis.discoveryclient.ApplicationKt" />
+    <module name="multum.examples.discoveryClient.main" />
+    <shortenClasspath name="NONE" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

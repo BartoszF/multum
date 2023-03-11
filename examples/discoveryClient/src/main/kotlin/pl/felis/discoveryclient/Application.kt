@@ -6,7 +6,6 @@ import pl.felis.discoveryclient.plugins.configureMonitoring
 import pl.felis.discoveryclient.plugins.configureRouting
 import pl.felis.discoveryclient.plugins.configureSerialization
 import pl.felis.discoveryclient.plugins.*
-import pl.felis.multum.client.discovery.setupDiscoveryClient
 
 fun main(args: Array<String>): Unit =
     io.ktor.server.netty.EngineMain.main(args)
@@ -17,6 +16,4 @@ fun Application.module() {
     configureMonitoring()
     configureSerialization()
     configureRouting()
-
-    setupDiscoveryClient(2137)
 }

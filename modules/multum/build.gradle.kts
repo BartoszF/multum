@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 val ktor_version: String by project
 val kotlin_version: String by project
 val logback_version: String by project
@@ -37,7 +39,7 @@ val tcnative_classifier = when {
 dependencies {
     implementation("io.ktor:ktor-server-core-jvm:$ktor_version")
     implementation("io.ktor:ktor-client-core:$ktor_version")
-    implementation("io.ktor:ktor-client-jetty:$ktor_version")
+    implementation("io.ktor:ktor-client-java:$ktor_version")
     implementation("io.ktor:ktor-client-content-negotiation:$ktor_version")
     implementation("io.ktor:ktor-server-resources:$ktor_version")
     implementation("io.ktor:ktor-server-host-common-jvm:$ktor_version")
@@ -73,6 +75,8 @@ dependencies {
 
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
 
+    implementation(project(":modules:multum-common"))
+
     testImplementation("io.ktor:ktor-server-tests-jvm:$ktor_version")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
 
@@ -81,4 +85,22 @@ dependencies {
 
 sourceSets.main {
     java.srcDirs("build/generated/ksp/main/kotlin")
+}
+
+tasks {
+    shadowJar {
+        manifest {
+            attributes(Pair("Main-Class", "pl.felis.multum.ApplicationKt"))
+        }
+    }
+}
+
+val compileKotlin: KotlinCompile by tasks
+compileKotlin.kotlinOptions {
+    jvmTarget = "11"
+}
+
+val compileTestKotlin: KotlinCompile by tasks
+compileTestKotlin.kotlinOptions {
+    jvmTarget = "11"
 }

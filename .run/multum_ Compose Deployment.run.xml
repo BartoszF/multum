@@ -1,0 +1,17 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="multum: Compose Deployment" type="docker-deploy" factoryName="docker-compose.yml" server-name="Docker">
+    <deployment type="docker-compose.yml">
+      <settings>
+        <option name="envFilePath" value="" />
+        <option name="removeImagesOnComposeDown" value="LOCAL" />
+        <option name="commandLineOptions" value="--build" />
+        <option name="sourceFilePath" value="docker/multum/docker-compose.yml" />
+        <option name="upForceRecreate" value="true" />
+      </settings>
+    </deployment>
+    <method v="2">
+      <option name="Gradle.BeforeRunTask" enabled="false" tasks=":modules:multum:buildFatJar" externalProjectPath="$PROJECT_DIR$" vmOptions="" scriptParameters="" />
+      <option name="Gradle.BeforeRunTask" enabled="false" tasks=":examples:discoveryClient:buildFatJar" externalProjectPath="$PROJECT_DIR$" vmOptions="" scriptParameters="" />
+    </method>
+  </configuration>
+</component>

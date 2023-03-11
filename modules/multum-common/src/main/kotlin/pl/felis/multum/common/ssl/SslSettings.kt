@@ -1,4 +1,4 @@
-package pl.felis.multum.plugins
+package pl.felis.multum.common.ssl
 
 import java.io.FileInputStream
 import java.security.KeyStore
@@ -12,6 +12,7 @@ object SslSettings {
         val keyStorePassword = "foobar".toCharArray()
         val keyStore: KeyStore = KeyStore.getInstance(KeyStore.getDefaultType())
         keyStore.load(keyStoreFile, keyStorePassword)
+        println(keyStore.aliases().toList().joinToString(", "))
         return keyStore
     }
 

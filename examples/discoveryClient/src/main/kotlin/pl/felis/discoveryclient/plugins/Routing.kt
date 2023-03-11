@@ -1,17 +1,18 @@
 package pl.felis.discoveryclient.plugins
 
 import io.ktor.http.*
-import io.ktor.resources.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.resources.*
-import io.ktor.server.resources.Resources
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
+import java.net.InetAddress
 
 @Serializable
-data class TempData(val msg: String, val num: Int)
+data class TempData(val msg: String, val num: Int, val hostname: String)
 
 fun Application.configureRouting() {
     install(Resources)
@@ -22,7 +23,15 @@ fun Application.configureRouting() {
     }
     routing {
         get("/test") {
-            call.respond(TempData("OK", 2137))
+            call.respond(
+                TempData(
+                    "OK",
+                    2137,
+                    withContext(Dispatchers.IO) {
+                        InetAddress.getLocalHost()
+                    }.hostName
+                )
+            )
         }
     }
 }

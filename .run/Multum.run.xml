@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Multum" type="JetRunConfigurationType">
+    <option name="MAIN_CLASS_NAME" value="pl.felis.multum.ApplicationKt" />
+    <module name="multum.modules.multum.main" />
+    <shortenClasspath name="NONE" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

@@ -1,0 +1,30 @@
+version: '2'
+services:
+  multum:
+    container_name: multum
+    build:
+      context: ../../modules/multum
+      dockerfile: ../../modules/multum/Dockerfile
+    #    image: multum:latest
+    ports:
+      - "8080:8080"
+    networks:
+      - multum-network
+  discovery-client:
+#    container_name: discovery-client
+    deploy:
+      mode: replicated
+      replicas: 2
+    build:
+      context: ../../examples/discoveryClient
+      dockerfile: ../../examples/discoveryClient/Dockerfile
+    #    image: discovery-client:latest
+#    ports:
+#      - "8100-8105:8100"
+    networks:
+      - multum-network
+    depends_on:
+      - multum
+networks:
+  multum-network:
+    driver: bridge

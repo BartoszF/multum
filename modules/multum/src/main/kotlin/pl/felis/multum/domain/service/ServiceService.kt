@@ -7,8 +7,10 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 import org.koin.core.annotation.Single
+import pl.felis.multum.collection.RoundRobinMap
+import java.lang.NullPointerException
+import java.lang.RuntimeException
 import java.util.*
-import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.schedule
 
@@ -23,14 +25,14 @@ data class ServiceNodeEntry(
     val port: Int,
     val ip: String,
     var status: NodeStatus = NodeStatus.ACTIVE,
-    val lastActivity: Instant = Clock.System.now()
+    var lastActivity: Instant = Clock.System.now()
 ) {
     fun getKey(): String = "$name@$ip:$port"
 }
 
 @Single
 class ServiceService(private val application: Application) { // TODO: This name...
-    private val serviceCache: Cache<String, MutableMap<String, ServiceNodeEntry>> =
+    private val serviceCache: Cache<String, RoundRobinMap<String, ServiceNodeEntry>> =
         Caffeine.newBuilder().recordStats().build()
     private val expiryTask: TimerTask
     private val expiryTime: Long =
@@ -44,14 +46,33 @@ class ServiceService(private val application: Application) { // TODO: This name.
 
     fun register(entry: ServiceNodeEntry) {
         val service = serviceCache.get(entry.name) {
-            ConcurrentHashMap()
+            RoundRobinMap()
         }
 
         service[entry.getKey()] = entry
     }
 
+    fun heartbeat(entry: ServiceNodeEntry) {
+        try {
+            val service = serviceCache.getIfPresent(entry.name)!!
+
+            service[entry.getKey()]!!.lastActivity = Clock.System.now()
+        } catch (e: NullPointerException) {
+            throw RuntimeException("No service ${entry.name} on ${entry.ip}:${entry.port} registered!")
+        }
+    }
+
     fun getServices(): List<String> {
-        return serviceCache.asMap().keys.toList() + "127.0.0.1"
+        return serviceCache.asMap().keys.toList()
+    }
+
+    fun serviceExists(name: String): Boolean {
+        val map = serviceCache.getIfPresent(name)
+        return map?.isNotEmpty() ?: false
+    }
+
+    fun roundRobinNodes(name: String): ServiceNodeEntry {
+        return serviceCache.getIfPresent(name)?.next() ?: throw RuntimeException("No registered nodes for $name")
     }
 
     fun getNodes(name: String): List<ServiceNodeEntry> {

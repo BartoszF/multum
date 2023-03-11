@@ -13,11 +13,13 @@ repositories {
 }
 
 dependencies {
-    implementation("io.ktor:ktor-client-core:$ktor_version")
+    api("io.ktor:ktor-client-core:$ktor_version")
     implementation("io.ktor:ktor-server-core:$ktor_version")
-    implementation("io.ktor:ktor-client-jetty:$ktor_version")
-    implementation("io.ktor:ktor-client-content-negotiation:$ktor_version")
-    implementation("io.ktor:ktor-serialization-kotlinx-json:$ktor_version")
+    api("io.ktor:ktor-client-java:$ktor_version")
+    api("io.ktor:ktor-client-content-negotiation:$ktor_version")
+    api("io.ktor:ktor-serialization-kotlinx-json:$ktor_version")
+
+    implementation(project(":modules:multum-common"))
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.1")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.1")
@@ -25,4 +27,14 @@ dependencies {
 
 tasks.getByName<Test>("test") {
     useJUnitPlatform()
+}
+
+val compileKotlin: org.jetbrains.kotlin.gradle.tasks.KotlinCompile by tasks
+compileKotlin.kotlinOptions {
+    jvmTarget = "11"
+}
+
+val compileTestKotlin: org.jetbrains.kotlin.gradle.tasks.KotlinCompile by tasks
+compileTestKotlin.kotlinOptions {
+    jvmTarget = "11"
 }
