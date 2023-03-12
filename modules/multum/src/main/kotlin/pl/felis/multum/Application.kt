@@ -55,9 +55,11 @@ fun ApplicationEngineEnvironmentBuilder.envConfig(args: Array<String>) {
         }
     }
 
+    val multumDiscoveryPort = config.propertyOrNull("multum.discovery.port")?.getString()?.toInt() ?: 9091
+
     connector {
         this.host = host
-        this.port = config.propertyOrNull("multum.discovery.port")?.getString()?.toInt() ?: 9091
+        this.port = multumDiscoveryPort
     }
 }
 

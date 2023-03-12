@@ -5,5 +5,6 @@ COPY keystore.jks keystore.jks
 COPY src/main/resources/application.conf application.conf
 EXPOSE 8443
 EXPOSE 8080
+EXPOSE 9091
 ENTRYPOINT ["java", "-jar","/multum.jar","-config=application.conf"]
 #, "-sslKeyStore=keystore.jks"
