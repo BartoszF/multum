@@ -7,8 +7,11 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
+import io.ktor.utils.io.*
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import pl.felis.multum.common.dao.ByeData
 import pl.felis.multum.common.dao.HeartbeatData
 import pl.felis.multum.common.dao.RegisterData
 import java.lang.RuntimeException
@@ -46,8 +49,8 @@ class MultumHandler(config: MultumPluginConfiguration, private val application: 
     fun initialize() {
         if (servicePort == null) throw RuntimeException("No port defined for multum service or application not running with SSL.")
 
-        Timer("multumRegister").schedule(0, TimeUnit.SECONDS.toMillis(10)) {
-            runBlocking {
+        runBlocking {
+            while (true) {
                 application.log.debug("Registering in multum...")
                 try {
                     client.post("$serviceEndpoint/register") {
@@ -59,9 +62,11 @@ class MultumHandler(config: MultumPluginConfiguration, private val application: 
                     heartbeatTask = Timer("multumHeartbeat").schedule(interval, interval) {
                         heartbeat()
                     }
-                    this.cancel("Sucessfully registered.")
+
+                    break
                 } catch (e: Throwable) {
                     application.log.error("Failed registering to multum. Will retry in 10 seconds...", e)
+                    delay(TimeUnit.SECONDS.toMillis(10))
                 }
             }
         }
@@ -87,14 +92,13 @@ class MultumHandler(config: MultumPluginConfiguration, private val application: 
 
     fun dispose() {
         heartbeatTask?.cancel()
-        // TODO: Endpoint in multum
-        /*runBlocking {
+        runBlocking {
             application.log.debug("Say bye to multum...")
             client.post("$multumEndpoint/service/$serviceName/bye") {
                 contentType(ContentType.Application.Json)
-                setBody(RegisterData(port))
+                setBody(ByeData(servicePort!!))
             }
             application.log.info("Goodbye multum")
-        }*/
+        }
     }
 }

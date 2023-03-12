@@ -28,6 +28,9 @@ class ServiceResource {
 
         @Resource("heartbeat")
         class Heartbeat(val service: Service)
+
+        @Resource("bye")
+        class Bye(val service: Service)
     }
 }
 
@@ -52,6 +55,10 @@ fun Route.serviceRouting() {
 
         post<ServiceResource.Service.Heartbeat> { heartbeat ->
             serviceController.heartbeat(heartbeat, call)
+        }
+
+        post<ServiceResource.Service.Bye> { bye ->
+            serviceController.bye(bye.service.name, call)
         }
     }
 

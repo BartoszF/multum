@@ -35,4 +35,20 @@ open class RoundRobinMap<K : Any, V : Any>() : ConcurrentHashMap<K, V>() {
 
         return v
     }
+
+    override fun remove(key: K): V? {
+        val v = super.remove(key)
+
+        currentKeys = keys.toList()
+
+        return v
+    }
+
+    override fun remove(key: K, value: V): Boolean {
+        val result = super.remove(key, value)
+
+        currentKeys = keys.toList()
+
+        return result
+    }
 }

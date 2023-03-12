@@ -20,6 +20,15 @@ enum class NodeStatus {
 }
 
 @Serializable
+data class ServiceNodeEntryQuery(
+    val name: String,
+    val port: Int,
+    val ip: String
+) {
+    fun getKey(): String = "$name@$ip:$port"
+}
+
+@Serializable
 data class ServiceNodeEntry(
     val name: String,
     val port: Int,
@@ -52,7 +61,7 @@ class ServiceService(private val application: Application) { // TODO: This name.
         service[entry.getKey()] = entry
     }
 
-    fun heartbeat(entry: ServiceNodeEntry) {
+    fun heartbeat(entry: ServiceNodeEntryQuery) {
         try {
             val service = serviceCache.getIfPresent(entry.name)!!
 
@@ -92,6 +101,18 @@ class ServiceService(private val application: Application) { // TODO: This name.
                     setNodeAsInactive(entry)
                 }
             }
+        }
+    }
+
+    fun remove(node: ServiceNodeEntryQuery) {
+        try {
+            val service = serviceCache.getIfPresent(node.name)!!
+
+            val v = service.remove(node.getKey())
+            assert(v != null)
+            assert(v!!.getKey() == node.getKey())
+        } catch (e: NullPointerException) {
+            throw RuntimeException("No service ${node.name} on ${node.ip}:${node.port} registered!")
         }
     }
 }
