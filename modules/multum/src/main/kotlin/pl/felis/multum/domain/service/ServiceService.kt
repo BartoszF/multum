@@ -7,7 +7,7 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 import org.koin.core.annotation.Single
-import pl.felis.multum.collection.RoundRobinMap
+import pl.felis.multum.collection.StatusAwareServiceNodeRoundRobin
 import java.lang.NullPointerException
 import java.lang.RuntimeException
 import java.util.*
@@ -32,7 +32,7 @@ data class ServiceNodeEntry(
 
 @Single
 class ServiceService(private val application: Application) { // TODO: This name...
-    private val serviceCache: Cache<String, RoundRobinMap<String, ServiceNodeEntry>> =
+    private val serviceCache: Cache<String, StatusAwareServiceNodeRoundRobin> =
         Caffeine.newBuilder().recordStats().build()
     private val expiryTask: TimerTask
     private val expiryTime: Long =
@@ -46,7 +46,7 @@ class ServiceService(private val application: Application) { // TODO: This name.
 
     fun register(entry: ServiceNodeEntry) {
         val service = serviceCache.get(entry.name) {
-            RoundRobinMap()
+            StatusAwareServiceNodeRoundRobin()
         }
 
         service[entry.getKey()] = entry
@@ -79,13 +79,17 @@ class ServiceService(private val application: Application) { // TODO: This name.
         return serviceCache.getIfPresent(name)?.values?.toList() ?: emptyList()
     }
 
+    fun setNodeAsInactive(node: ServiceNodeEntry, throwable: Throwable? = null) {
+        node.status = NodeStatus.INACTIVE
+        application.log.error("Service ${node.name} on ${node.ip}:${node.port} no longer available", throwable)
+    }
+
     private fun invalidateNodes() {
         val now = Clock.System.now()
         serviceCache.asMap().values.forEach {
             it.values.forEach { entry ->
                 if (entry.status == NodeStatus.ACTIVE && (now - entry.lastActivity).inWholeSeconds > expiryTime) {
-                    entry.status = NodeStatus.INACTIVE
-                    application.log.info("Service ${entry.name} on ${entry.ip}:${entry.port} no longer available")
+                    setNodeAsInactive(entry)
                 }
             }
         }

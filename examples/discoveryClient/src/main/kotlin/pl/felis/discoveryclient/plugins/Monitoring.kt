@@ -6,10 +6,11 @@ import io.ktor.server.metrics.micrometer.*
 import io.ktor.server.plugins.callid.*
 import io.ktor.server.plugins.callloging.*
 import io.ktor.server.request.*
-import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.micrometer.prometheus.*
 import org.slf4j.event.*
+import pl.felis.multum.common.util.UUID_REGEX
+import java.util.*
 
 fun Application.configureMonitoring() {
     install(CallLogging) {
@@ -20,8 +21,11 @@ fun Application.configureMonitoring() {
     install(CallId) {
         header(HttpHeaders.XRequestId)
         verify { callId: String ->
-            callId.isNotEmpty()
+            callId.isNotEmpty() and
+                UUID_REGEX.matcher(callId).matches()
         }
+        replyToHeader(HttpHeaders.XRequestId)
+        generate { UUID.randomUUID().toString() }
     }
     val appMicrometerRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
 

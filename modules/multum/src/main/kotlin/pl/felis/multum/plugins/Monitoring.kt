@@ -9,10 +9,8 @@ import io.ktor.server.request.*
 import io.ktor.server.routing.*
 import io.micrometer.prometheus.*
 import org.slf4j.event.*
+import pl.felis.multum.common.util.UUID_REGEX
 import java.util.UUID
-import java.util.regex.Pattern
-
-val UUID_REGEX = Pattern.compile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
 
 fun Application.configureMonitoring() {
     install(CallLogging) {

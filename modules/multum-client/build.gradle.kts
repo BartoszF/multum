@@ -19,7 +19,7 @@ dependencies {
     api("io.ktor:ktor-client-content-negotiation:$ktor_version")
     api("io.ktor:ktor-serialization-kotlinx-json:$ktor_version")
 
-    implementation(project(":modules:multum-common"))
+    api(project(":modules:multum-common"))
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.1")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.1")

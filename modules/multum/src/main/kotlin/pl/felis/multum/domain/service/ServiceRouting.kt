@@ -34,21 +34,25 @@ class ServiceResource {
 fun Route.serviceRouting() {
     val serviceController: ServiceController by inject()
     val routingController: RoutingController by inject()
+    val discoveryPort =
+        application.environment.config.propertyOrNull("multum.dicovery.port")?.getString()?.toInt() ?: 9091
 
-    get<ServiceResource> {
-        serviceController.getServices(call)
-    }
+    localPort(discoveryPort) {
+        get<ServiceResource> {
+            serviceController.getServices(call)
+        }
 
-    get<ServiceResource.Service> { serviceName ->
-        serviceController.getNodes(serviceName.name, call)
-    }
+        get<ServiceResource.Service> { serviceName ->
+            serviceController.getNodes(serviceName.name, call)
+        }
 
-    post<ServiceResource.Service.Register> { register ->
-        serviceController.register(register, call)
-    }
+        post<ServiceResource.Service.Register> { register ->
+            serviceController.register(register, call)
+        }
 
-    post<ServiceResource.Service.Heartbeat> { heartbeat ->
-        serviceController.heartbeat(heartbeat, call)
+        post<ServiceResource.Service.Heartbeat> { heartbeat ->
+            serviceController.heartbeat(heartbeat, call)
+        }
     }
 
     route("{...}") {

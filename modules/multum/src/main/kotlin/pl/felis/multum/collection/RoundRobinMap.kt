@@ -2,16 +2,16 @@ package pl.felis.multum.collection
 
 import java.util.concurrent.ConcurrentHashMap
 
-class RoundRobinMap<K : Any, V : Any>() : ConcurrentHashMap<K, V>() {
-    private var currentIndex = 0
+open class RoundRobinMap<K : Any, V : Any>() : ConcurrentHashMap<K, V>() {
+    protected var currentIndex = 0
     private var currentKeys = keys.toList()
 
-    fun next(): V {
+    open fun next(): V? {
         val entry = this[currentKeys[currentIndex]]
         currentIndex += 1
         if (currentIndex >= currentKeys.size) currentIndex = 0
 
-        return entry!!
+        return entry
     }
 
     override fun put(key: K, value: V): V? {

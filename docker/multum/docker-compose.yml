@@ -5,7 +5,7 @@ services:
     build:
       context: ../../modules/multum
       dockerfile: ../../modules/multum/Dockerfile
-    #    image: multum:latest
+    image: multum:latest
     ports:
       - "8080:8080"
     networks:
@@ -18,7 +18,7 @@ services:
     build:
       context: ../../examples/discoveryClient
       dockerfile: ../../examples/discoveryClient/Dockerfile
-    #    image: discovery-client:latest
+    image: discovery-client:latest
 #    ports:
 #      - "8100-8105:8100"
     networks:
