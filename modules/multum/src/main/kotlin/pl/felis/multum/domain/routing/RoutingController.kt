@@ -5,13 +5,18 @@ import io.ktor.client.call.*
 import io.ktor.client.engine.java.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
+import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
+import io.micrometer.core.instrument.Tag
+import io.micrometer.core.instrument.Tags
+import kotlinx.coroutines.runBlocking
 import org.koin.core.annotation.Single
 import pl.felis.multum.domain.service.ServiceService
+import pl.felis.multum.plugins.appMicrometerRegistry
 import java.net.ConnectException
 
 val gatewayClient = HttpClient(Java) {
@@ -48,16 +53,23 @@ class RoutingController(private val service: ServiceService) {
 
         call.application.log.info("Routing request to ${node.getKey()}")
         val response = try {
-            gatewayClient.request {
-                this.method = method
-                if (!body.isNullOrEmpty()) setBody(body)
-                this.host = serviceName
-                // TODO: Change to https
-                this.url.set("http", node.ip, node.port, call.request.path())
-                this.accept(
-                    call.request.accept()?.let { it1 -> ContentType.parse(it1) }
-                        ?: ContentType.Application.Json
-                )
+            appMicrometerRegistry.timer(
+                "multum_node_request",
+                Tags.of(Tag.of("service", serviceName), Tag.of("node", node.getKey()))
+            ).record<HttpResponse> {
+                runBlocking {
+                    gatewayClient.request {
+                        this.method = method
+                        if (!body.isNullOrEmpty()) setBody(body)
+                        this.host = serviceName
+                        // TODO: Change to https
+                        this.url.set("http", node.ip, node.port, call.request.path())
+                        this.accept(
+                            call.request.accept()?.let { it1 -> ContentType.parse(it1) }
+                                ?: ContentType.Application.Json
+                        )
+                    }
+                }
             }
         } catch (e: ConnectException) {
             service.setNodeAsInactive(node, e)

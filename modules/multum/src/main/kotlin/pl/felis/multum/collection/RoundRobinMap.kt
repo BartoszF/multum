@@ -1,15 +1,16 @@
 package pl.felis.multum.collection
 
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicInteger
 
 open class RoundRobinMap<K : Any, V : Any>() : ConcurrentHashMap<K, V>() {
-    protected var currentIndex = 0
+    protected var currentIndex = AtomicInteger(0)
     private var currentKeys = keys.toList()
 
-    open fun next(): V? {
-        val entry = this[currentKeys[currentIndex]]
-        currentIndex += 1
-        if (currentIndex >= currentKeys.size) currentIndex = 0
+    open suspend fun next(): V? {
+        val entry = this[currentKeys[currentIndex.get()]]
+        val i = currentIndex.addAndGet(1)
+        if (i >= currentKeys.size) currentIndex.set(0)
 
         return entry
     }

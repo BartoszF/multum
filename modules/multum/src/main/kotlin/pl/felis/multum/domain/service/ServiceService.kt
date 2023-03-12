@@ -86,7 +86,7 @@ class ServiceService(private val application: Application) { // TODO: This name.
         return map?.isNotEmpty() ?: false
     }
 
-    fun roundRobinNodes(name: String): ServiceNodeEntry {
+    suspend fun roundRobinNodes(name: String): ServiceNodeEntry {
         return serviceCache.getIfPresent(name)?.next() ?: throw RuntimeException("No registered nodes for $name")
     }
 

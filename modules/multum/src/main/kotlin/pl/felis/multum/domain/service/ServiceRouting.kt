@@ -16,8 +16,12 @@ import io.ktor.server.resources.post
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.util.*
+import io.micrometer.core.instrument.Tag
+import io.micrometer.core.instrument.Tags
+import kotlinx.coroutines.runBlocking
 import org.koin.ktor.ext.inject
 import pl.felis.multum.domain.routing.RoutingController
+import pl.felis.multum.plugins.appMicrometerRegistry
 
 @Resource("/service")
 class ServiceResource {
@@ -64,7 +68,13 @@ fun Route.serviceRouting() {
 
     route("{...}") {
         handle {
-            routingController.routeToNode(call)
+            appMicrometerRegistry
+                .timer("multum_routing_call", Tags.of(Tag.of("service", call.request.host())))
+                .record<Unit> {
+                    runBlocking {
+                        routingController.routeToNode(call)
+                    }
+                }
         }
     }
 }

@@ -26,6 +26,15 @@ services:
       - multum-network
     depends_on:
       - multum
+  prometheus:
+    container_name: multum-prometheus
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - multum-network
 networks:
   multum-network:
     driver: bridge
