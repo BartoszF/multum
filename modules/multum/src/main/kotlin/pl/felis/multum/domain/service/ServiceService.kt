@@ -37,6 +37,7 @@ data class ServiceNodeEntry(
     var lastActivity: Instant = Clock.System.now()
 ) {
     fun getKey(): String = "$name@$ip:$port"
+    fun toQuery(): ServiceNodeEntryQuery = ServiceNodeEntryQuery(name, port, ip)
 }
 
 @Single
@@ -45,7 +46,9 @@ class ServiceService(private val application: Application) { // TODO: This name.
         Caffeine.newBuilder().recordStats().build()
     private val expiryTask: TimerTask
     private val expiryTime: Long =
-        application.environment.config.property("multum.discovery.expiryInSeconds").getString().toLong()
+        application.environment.config.property("multum.discovery.expiryAfterSeconds").getString().toLong()
+    private val removalTime: Long =
+        application.environment.config.property("multum.discovery.removeAfterSeconds").getString().toLong()
 
     init {
         expiryTask = Timer("serviceNodeExpiry").schedule(0, TimeUnit.SECONDS.toMillis(1)) {
@@ -53,12 +56,15 @@ class ServiceService(private val application: Application) { // TODO: This name.
         }
     }
 
-    fun register(entry: ServiceNodeEntry) {
+    fun register(entry: ServiceNodeEntryQuery): ServiceNodeEntry {
         val service = serviceCache.get(entry.name) {
             StatusAwareServiceNodeRoundRobin()
         }
 
-        service[entry.getKey()] = entry
+        val node = ServiceNodeEntry(entry.name, entry.port, entry.ip)
+        service[entry.getKey()] = node
+
+        return node
     }
 
     fun heartbeat(entry: ServiceNodeEntryQuery) {
@@ -67,7 +73,7 @@ class ServiceService(private val application: Application) { // TODO: This name.
 
             service[entry.getKey()]!!.lastActivity = Clock.System.now()
         } catch (e: NullPointerException) {
-            throw RuntimeException("No service ${entry.name} on ${entry.ip}:${entry.port} registered!")
+            throw RuntimeException("No service ${entry.getKey()} registered!")
         }
     }
 
@@ -90,7 +96,7 @@ class ServiceService(private val application: Application) { // TODO: This name.
 
     fun setNodeAsInactive(node: ServiceNodeEntry, throwable: Throwable? = null) {
         node.status = NodeStatus.INACTIVE
-        application.log.error("Service ${node.name} on ${node.ip}:${node.port} no longer available", throwable)
+        application.log.error("Service ${node.getKey()} no longer available", throwable)
     }
 
     private fun invalidateNodes() {
@@ -100,6 +106,10 @@ class ServiceService(private val application: Application) { // TODO: This name.
                 if (entry.status == NodeStatus.ACTIVE && (now - entry.lastActivity).inWholeSeconds > expiryTime) {
                     setNodeAsInactive(entry)
                 }
+                if (entry.status == NodeStatus.INACTIVE && (now - entry.lastActivity).inWholeSeconds > removalTime) {
+                    application.log.info("Removing node ${entry.getKey()} due to inactivity")
+                    remove(entry.toQuery())
+                }
             }
         }
     }
@@ -108,9 +118,7 @@ class ServiceService(private val application: Application) { // TODO: This name.
         try {
             val service = serviceCache.getIfPresent(node.name)!!
 
-            val v = service.remove(node.getKey())
-            assert(v != null)
-            assert(v!!.getKey() == node.getKey())
+            service.remove(node.getKey())
         } catch (e: NullPointerException) {
             throw RuntimeException("No service ${node.name} on ${node.ip}:${node.port} registered!")
         }

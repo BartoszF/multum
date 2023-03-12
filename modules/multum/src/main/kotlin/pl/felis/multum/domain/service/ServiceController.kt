@@ -14,16 +14,17 @@ class ServiceController(private val service: ServiceService) {
     suspend fun register(register: ServiceResource.Service.Register, call: ApplicationCall) {
         val data = call.receive<RegisterData>()
         val ip = call.request.origin.remoteAddress
-        service.register(ServiceNodeEntry(register.service.name, data.port, ip))
-        call.application.log.info("Register service with name \"${register.service.name}\" on $ip:${data.port}")
-        call.respondText("Register service with name \"${register.service.name}\" on $ip:${data.port}")
+        val node = service.register(ServiceNodeEntryQuery(register.service.name, data.port, ip))
+        call.application.log.info("Registered service ${node.getKey()}")
+        call.respondText("OK")
     }
 
     suspend fun heartbeat(heartbeat: ServiceResource.Service.Heartbeat, call: ApplicationCall) {
-        call.application.log.info("Heartbeat for ${heartbeat.service.name}...")
         val data = call.receive<RegisterData>()
         val ip = call.request.origin.remoteAddress
-        service.heartbeat(ServiceNodeEntryQuery(heartbeat.service.name, data.port, ip))
+        val node = ServiceNodeEntryQuery(heartbeat.service.name, data.port, ip)
+        service.heartbeat(node)
+        call.application.log.info("Heartbeat for ${node.getKey()}...")
         call.respondText("OK")
     }
 
@@ -38,7 +39,9 @@ class ServiceController(private val service: ServiceService) {
     suspend fun bye(serviceName: String, call: ApplicationCall) {
         val data = call.receive<ByeData>()
         val ip = call.request.origin.remoteAddress
-        service.remove(ServiceNodeEntryQuery(serviceName, data.port, ip))
+        val node = ServiceNodeEntryQuery(serviceName, data.port, ip)
+        service.remove(node)
+        call.application.log.info("Removed ${node.getKey()}")
         call.respondText("BYE")
     }
 }
