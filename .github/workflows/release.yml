@@ -22,7 +22,7 @@ jobs:
       - name: Gradle permission
         run: chmod +x ./gradlew
       - name: Build client
-        run: ./gradlew :modules:multum-client:jar -Pversion=${{ env.ver }}
+        run: ./gradlew :modules:multum-client:shadowJar -Pversion=${{ env.ver }}
       - name: 'Upload backend artifact'
         uses: actions/upload-artifact@v3
         with:
@@ -32,5 +32,5 @@ jobs:
       - name: Upload backend to release
         uses: svenstaro/upload-release-action@v2
         with:
-          file: modules/multum-client/build/libs/multum-client-${{ env.ver }}.jar
+          file: modules/multum-client/build/libs/multum-client-${{ env.ver }}-all.jar
           asset_name: multum-client-${{ env.ver }}.jar
