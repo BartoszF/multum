@@ -4,8 +4,8 @@ name: Run build on release
     types: [ released ]
 
 jobs:
-  build_and_artifacts:
-    name: Build artifacts
+  release_client:
+    name: Release client
     runs-on: ubuntu-latest
     steps:
       - run: |
@@ -22,7 +22,7 @@ jobs:
       - name: Gradle permission
         run: chmod +x ./gradlew
       - name: Build client
-        run: ./gradlew :modules:multum-client:buildFatJar -Pversion=${{ env.ver }}
+        run: ./gradlew :modules:multum-client:jar -Pversion=${{ env.ver }}
       - name: 'Upload backend artifact'
         uses: actions/upload-artifact@v3
         with:
