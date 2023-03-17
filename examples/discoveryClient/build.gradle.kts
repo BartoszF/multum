@@ -23,6 +23,7 @@ application {
 
 repositories {
     mavenCentral()
+    maven("https://jitpack.io")
 }
 
 val osName = System.getProperty("os.name").toLowerCase()
@@ -56,6 +57,7 @@ dependencies {
     }
 
     implementation(project(":modules:multum-client"))
+//    implementation("com.github.BartoszF.multum:multum-client:0.0.3")
 
     testImplementation("io.ktor:ktor-server-tests-jvm:$ktor_version")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
