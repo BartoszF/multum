@@ -22,6 +22,7 @@ import kotlinx.coroutines.runBlocking
 import org.koin.ktor.ext.inject
 import pl.felis.multum.domain.routing.RoutingController
 import pl.felis.multum.plugins.appMicrometerRegistry
+import pl.felis.multum.util.apiPort
 
 @Resource("/service")
 class ServiceResource {
@@ -41,10 +42,8 @@ class ServiceResource {
 fun Route.serviceRouting() {
     val serviceController: ServiceController by inject()
     val routingController: RoutingController by inject()
-    val discoveryPort =
-        application.environment.config.propertyOrNull("multum.dicovery.port")?.getString()?.toInt() ?: 9091
 
-    localPort(discoveryPort) {
+    apiPort {
         get<ServiceResource> {
             serviceController.getServices(call)
         }

@@ -7,6 +7,7 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
+import io.ktor.server.config.*
 import io.ktor.utils.io.*
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
@@ -27,6 +28,8 @@ class MultumHandler(config: MultumPluginConfiguration, private val application: 
     private val servicePort =
         config.port ?: application.environment.config.propertyOrNull("ktor.deployment.sslPort")?.getString()
             ?.toInt()
+    private val hasPrometheusMetrics =
+        application.environment.config.tryGetString("multum.discovery.prometheus")?.toBoolean() ?: true
 
     private val serviceEndpoint = "$multumEndpoint/service/$serviceName"
 
@@ -55,7 +58,7 @@ class MultumHandler(config: MultumPluginConfiguration, private val application: 
                 try {
                     client.post("$serviceEndpoint/register") {
                         contentType(ContentType.Application.Json)
-                        setBody(RegisterData(servicePort))
+                        setBody(RegisterData(servicePort, hasPrometheusMetrics))
                     }
                     application.log.info("Succesfully registered in multum.")
                     val interval = TimeUnit.SECONDS.toMillis(heartbeatInterval)

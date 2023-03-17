@@ -1,14 +1,13 @@
 package pl.felis.multum.plugins
 
 import io.ktor.http.*
-import io.ktor.resources.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.statuspages.*
-import io.ktor.server.resources.*
 import io.ktor.server.resources.Resources
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import pl.felis.multum.domain.service.serviceRouting
+import pl.felis.multum.domain.serviceDiscovery.prometheus.prometheusDiscoveryRoute
 
 fun Application.configureRouting() {
     install(Resources)
@@ -24,5 +23,6 @@ fun Application.configureRouting() {
         }
 
         serviceRouting()
+        prometheusDiscoveryRoute()
     }
 }

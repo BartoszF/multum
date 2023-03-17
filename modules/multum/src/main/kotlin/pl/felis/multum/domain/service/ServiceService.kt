@@ -8,9 +8,11 @@ import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 import org.koin.core.annotation.Single
 import pl.felis.multum.collection.StatusAwareServiceNodeRoundRobin
+import pl.felis.multum.common.dao.RegisterData
 import java.lang.NullPointerException
 import java.lang.RuntimeException
 import java.util.*
+import java.util.concurrent.ConcurrentMap
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.schedule
 
@@ -33,6 +35,7 @@ data class ServiceNodeEntry(
     val name: String,
     val port: Int,
     val ip: String,
+    val prometheusMetrics: Boolean,
     var status: NodeStatus = NodeStatus.ACTIVE,
     var lastActivity: Instant = Clock.System.now()
 ) {
@@ -56,12 +59,12 @@ class ServiceService(private val application: Application) { // TODO: This name.
         }
     }
 
-    fun register(entry: ServiceNodeEntryQuery): ServiceNodeEntry {
+    fun register(entry: ServiceNodeEntryQuery, data: RegisterData): ServiceNodeEntry {
         val service = serviceCache.get(entry.name) {
             StatusAwareServiceNodeRoundRobin()
         }
 
-        val node = ServiceNodeEntry(entry.name, entry.port, entry.ip)
+        val node = ServiceNodeEntry(entry.name, entry.port, entry.ip, data.prometheusMetrics)
         service[entry.getKey()] = node
 
         return node
@@ -79,6 +82,10 @@ class ServiceService(private val application: Application) { // TODO: This name.
 
     fun getServices(): List<String> {
         return serviceCache.asMap().keys.toList()
+    }
+
+    fun getServiceMap(): ConcurrentMap<String, StatusAwareServiceNodeRoundRobin>? {
+        return serviceCache.asMap()
     }
 
     fun serviceExists(name: String): Boolean {

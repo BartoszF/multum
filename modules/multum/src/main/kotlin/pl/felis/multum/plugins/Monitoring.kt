@@ -11,6 +11,7 @@ import io.ktor.server.routing.*
 import io.micrometer.prometheus.*
 import org.slf4j.event.*
 import pl.felis.multum.common.util.UUID_REGEX
+import pl.felis.multum.util.apiPort
 import java.util.UUID
 
 val appMicrometerRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
@@ -31,15 +32,12 @@ fun Application.configureMonitoring() {
         generate { UUID.randomUUID().toString() }
     }
 
-    val discoveryPort =
-        environment.config.propertyOrNull("multum.dicovery.port")?.getString()?.toInt() ?: 9091
-
     install(MicrometerMetrics) {
         registry = appMicrometerRegistry
     }
 
     routing {
-        localPort(discoveryPort) {
+        apiPort {
             get("/metrics") {
                 call.respond(appMicrometerRegistry.scrape())
             }

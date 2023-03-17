@@ -11,4 +11,7 @@ scrape_configs:
     metrics_path: /metrics
     static_configs:
       - targets: [ 'multum:9091' ]
+  - job_name: 'multum_sd'
+    http_sd_configs:
+      - url: 'http://multum:9091/serviceDiscovery/prometheus'
 
