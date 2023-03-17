@@ -32,5 +32,5 @@ jobs:
       - name: Upload backend to release
         uses: svenstaro/upload-release-action@v2
         with:
-          file: modules/multum-client/build/libs/multum-client.jar
+          file: modules/multum-client/build/libs/multum-client-${{ env.ver }}.jar
           asset_name: multum-client-${{ env.ver }}.jar
