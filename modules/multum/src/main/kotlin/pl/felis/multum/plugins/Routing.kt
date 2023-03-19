@@ -6,7 +6,7 @@ import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.resources.Resources
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import pl.felis.multum.domain.service.serviceRouting
+import pl.felis.multum.domain.discovery.serviceRouting
 import pl.felis.multum.domain.serviceDiscovery.prometheus.prometheusDiscoveryRoute
 
 fun Application.configureRouting() {

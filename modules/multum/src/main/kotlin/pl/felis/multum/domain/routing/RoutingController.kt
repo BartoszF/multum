@@ -15,7 +15,7 @@ import io.micrometer.core.instrument.Tag
 import io.micrometer.core.instrument.Tags
 import kotlinx.coroutines.runBlocking
 import org.koin.core.annotation.Single
-import pl.felis.multum.domain.service.ServiceService
+import pl.felis.multum.domain.discovery.DiscoveryService
 import pl.felis.multum.plugins.appMicrometerRegistry
 import java.net.ConnectException
 
@@ -34,7 +34,7 @@ val gatewayClient = HttpClient(Java) {
 }
 
 @Single
-class RoutingController(private val service: ServiceService) {
+class RoutingController(private val service: DiscoveryService) {
 
     suspend fun routeToNode(call: ApplicationCall) {
         call.application.log.info("Handling service ${call.request.host()}, method ${call.request.httpMethod}, headers ${call.request.headers}")

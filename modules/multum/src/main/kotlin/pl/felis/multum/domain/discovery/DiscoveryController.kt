@@ -1,4 +1,4 @@
-package pl.felis.multum.domain.service
+package pl.felis.multum.domain.discovery
 
 import io.ktor.server.application.*
 import io.ktor.server.plugins.*
@@ -10,7 +10,7 @@ import pl.felis.multum.common.dao.HeartbeatData
 import pl.felis.multum.common.dao.RegisterData
 
 @Single
-class ServiceController(private val service: ServiceService) {
+class DiscoveryController(private val service: DiscoveryService) {
 
     suspend fun register(register: ServiceResource.Service.Register, call: ApplicationCall) {
         val data = call.receive<RegisterData>()

@@ -4,16 +4,16 @@ import io.ktor.server.application.*
 import io.ktor.server.response.*
 import kotlinx.serialization.Serializable
 import org.koin.core.annotation.Single
-import pl.felis.multum.domain.service.ServiceService
+import pl.felis.multum.domain.discovery.DiscoveryService
 
 @Serializable
 data class PrometheusDiscoveryServiceEntry(val targets: List<String>, val labels: Map<String, String>)
 
 @Single
-class PrometheusDiscoveryService(private val serviceService: ServiceService) {
+class PrometheusDiscoveryService(private val discoveryService: DiscoveryService) {
 
     suspend fun handleRequest(call: ApplicationCall) {
-        val list: List<PrometheusDiscoveryServiceEntry> = serviceService.getServiceMap()
+        val list: List<PrometheusDiscoveryServiceEntry> = discoveryService.getServiceMap()
             ?.map { Pair(it.key, it.value.values.filter { entry -> entry.prometheusMetrics }) }
             ?.map {
                 PrometheusDiscoveryServiceEntry(
