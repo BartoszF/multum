@@ -39,7 +39,8 @@ class RoutingController(private val service: DiscoveryService) {
     suspend fun routeToNode(call: ApplicationCall) {
         call.application.log.info("Handling service ${call.request.host()}, method ${call.request.httpMethod}, headers ${call.request.headers}")
 
-        val serviceName = call.request.host()
+        val (serviceName, path) = call.request.path().split("/", limit = 3).drop(1)
+
         val method = call.request.httpMethod
         val body: String? =
             if (method in listOf(HttpMethod.Post, HttpMethod.Put, HttpMethod.Patch)) call.receiveText() else null
@@ -52,6 +53,7 @@ class RoutingController(private val service: DiscoveryService) {
         val node = service.roundRobinNodes(serviceName)
 
         call.application.log.info("Routing request to ${node.getKey()}")
+
         val response = try {
             appMicrometerRegistry.timer(
                 "multum_node_request",
@@ -62,8 +64,7 @@ class RoutingController(private val service: DiscoveryService) {
                         this.method = method
                         if (!body.isNullOrEmpty()) setBody(body)
                         this.host = serviceName
-                        // TODO: Change to https
-                        this.url.set("http", node.ip, node.port, call.request.path())
+                        this.url.set(null, node.ip, node.port, "/$path")
                         this.accept(
                             call.request.accept()?.let { it1 -> ContentType.parse(it1) }
                                 ?: ContentType.Application.Json
