@@ -1,4 +1,4 @@
-package pl.felis.multum.domain.service
+package pl.felis.multum.domain.discovery
 
 import com.github.benmanes.caffeine.cache.Cache
 import com.github.benmanes.caffeine.cache.Caffeine
@@ -44,7 +44,7 @@ data class ServiceNodeEntry(
 }
 
 @Single
-class ServiceService(private val application: Application) { // TODO: This name...
+class DiscoveryService(private val application: Application) { // TODO: This name...
     private val serviceCache: Cache<String, StatusAwareServiceNodeRoundRobin> =
         Caffeine.newBuilder().recordStats().build()
     private val expiryTask: TimerTask

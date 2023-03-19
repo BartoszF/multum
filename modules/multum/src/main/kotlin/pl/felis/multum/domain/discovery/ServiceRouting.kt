@@ -1,4 +1,4 @@
-package pl.felis.multum.domain.service
+package pl.felis.multum.domain.discovery
 
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -40,28 +40,28 @@ class ServiceResource {
 }
 
 fun Route.serviceRouting() {
-    val serviceController: ServiceController by inject()
+    val discoveryController: DiscoveryController by inject()
     val routingController: RoutingController by inject()
 
     apiPort {
         get<ServiceResource> {
-            serviceController.getServices(call)
+            discoveryController.getServices(call)
         }
 
         get<ServiceResource.Service> { serviceName ->
-            serviceController.getNodes(serviceName.name, call)
+            discoveryController.getNodes(serviceName.name, call)
         }
 
         post<ServiceResource.Service.Register> { register ->
-            serviceController.register(register, call)
+            discoveryController.register(register, call)
         }
 
         post<ServiceResource.Service.Heartbeat> { heartbeat ->
-            serviceController.heartbeat(heartbeat, call)
+            discoveryController.heartbeat(heartbeat, call)
         }
 
         post<ServiceResource.Service.Bye> { bye ->
-            serviceController.bye(bye.service.name, call)
+            discoveryController.bye(bye.service.name, call)
         }
     }
 
