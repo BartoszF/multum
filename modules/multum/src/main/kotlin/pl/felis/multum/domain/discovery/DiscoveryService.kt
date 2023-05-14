@@ -18,14 +18,14 @@ import kotlin.concurrent.schedule
 
 enum class NodeStatus {
     ACTIVE,
-    INACTIVE
+    INACTIVE,
 }
 
 @Serializable
 data class ServiceNodeEntryQuery(
     val name: String,
     val port: Int,
-    val ip: String
+    val ip: String,
 ) {
     fun getKey(): String = "$name@$ip:$port"
 }
@@ -37,7 +37,7 @@ data class ServiceNodeEntry(
     val ip: String,
     val prometheusMetrics: Boolean,
     var status: NodeStatus = NodeStatus.ACTIVE,
-    var lastActivity: Instant = Clock.System.now()
+    var lastActivity: Instant = Clock.System.now(),
 ) {
     fun getKey(): String = "$name@$ip:$port"
     fun toQuery(): ServiceNodeEntryQuery = ServiceNodeEntryQuery(name, port, ip)

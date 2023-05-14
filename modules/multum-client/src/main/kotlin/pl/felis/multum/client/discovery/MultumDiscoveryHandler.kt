@@ -1,17 +1,13 @@
 package pl.felis.multum.client.discovery
 
-import io.ktor.client.*
-import io.ktor.client.engine.java.*
-import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.http.*
-import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.config.*
-import io.ktor.utils.io.*
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import pl.felis.multum.client.client
+import pl.felis.multum.common.MultumPaths
 import pl.felis.multum.common.dao.ByeData
 import pl.felis.multum.common.dao.HeartbeatData
 import pl.felis.multum.common.dao.RegisterData
@@ -21,7 +17,7 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.schedule
 
-class MultumHandler(config: MultumPluginConfiguration, private val application: Application) {
+class MultumDiscoveryHandler(config: MultumPluginConfiguration, private val application: Application) {
     private val multumEndpoint = config.endpoint
     private val serviceName = config.serviceName
     private val heartbeatInterval = config.heartbeatInterval
@@ -31,23 +27,9 @@ class MultumHandler(config: MultumPluginConfiguration, private val application: 
     private val hasPrometheusMetrics =
         application.environment.config.tryGetString("multum.discovery.prometheus")?.toBoolean() ?: true
 
-    private val serviceEndpoint = "$multumEndpoint/service/$serviceName"
+    private val serviceEndpoint = "$multumEndpoint/${MultumPaths.Service}/$serviceName"
 
     private var heartbeatTask: TimerTask? = null
-
-    private val client = HttpClient(Java) {
-        engine {
-//            config {
-//                sslContext(SslSettings.getSslContext())
-//            }
-            threadsCount = 8
-            pipelining = true
-//            protocolVersion = java.net.http.HttpClient.Version.HTTP_2
-        }
-        install(ContentNegotiation) {
-            json()
-        }
-    }
 
     fun initialize() {
         if (servicePort == null) throw RuntimeException("No port defined for multum service or application not running with SSL.")
@@ -56,7 +38,7 @@ class MultumHandler(config: MultumPluginConfiguration, private val application: 
             while (true) {
                 application.log.debug("Registering in multum...")
                 try {
-                    client.post("$serviceEndpoint/register") {
+                    client.post("$serviceEndpoint/${MultumPaths.Register}") {
                         contentType(ContentType.Application.Json)
                         setBody(RegisterData(servicePort, hasPrometheusMetrics))
                     }
@@ -79,7 +61,7 @@ class MultumHandler(config: MultumPluginConfiguration, private val application: 
         runBlocking {
             application.log.debug("Multum heartbeat...")
             try {
-                client.post("$serviceEndpoint/heartbeat") {
+                client.post("$serviceEndpoint/${MultumPaths.Heartbeat}") {
                     contentType(ContentType.Application.Json)
                     setBody(HeartbeatData(servicePort!!))
                 }
@@ -97,7 +79,7 @@ class MultumHandler(config: MultumPluginConfiguration, private val application: 
         heartbeatTask?.cancel()
         runBlocking {
             application.log.debug("Say bye to multum...")
-            client.post("$multumEndpoint/service/$serviceName/bye") {
+            client.post("$multumEndpoint/${MultumPaths.Service}/$serviceName/${MultumPaths.Bye}") {
                 contentType(ContentType.Application.Json)
                 setBody(ByeData(servicePort!!))
             }

@@ -1,4 +1,4 @@
-package pl.felis.multum.collection
+package pl.felis.multum.common.collection
 
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
