@@ -15,18 +15,19 @@ import io.micrometer.core.instrument.Tag
 import io.micrometer.core.instrument.Tags
 import kotlinx.coroutines.runBlocking
 import org.koin.core.annotation.Single
+import pl.felis.multum.common.ssl.SslSettings
 import pl.felis.multum.domain.discovery.DiscoveryService
 import pl.felis.multum.plugins.appMicrometerRegistry
 import java.net.ConnectException
 
 val gatewayClient = HttpClient(Java) {
     engine {
-//        config {
-//            sslContext(SslSettings.getSslContext())
-//        }
+        config {
+            sslContext(SslSettings.getSslContext())
+        }
         threadsCount = 8
         pipelining = true
-//        protocolVersion = java.net.http.HttpClient.Version.HTTP_2
+        protocolVersion = java.net.http.HttpClient.Version.HTTP_2
     }
     install(ContentNegotiation) {
         json()
@@ -57,7 +58,7 @@ class RoutingController(private val service: DiscoveryService) {
         val response = try {
             appMicrometerRegistry.timer(
                 "multum_node_request",
-                Tags.of(Tag.of("service", serviceName), Tag.of("node", node.getKey()))
+                Tags.of(Tag.of("service", serviceName), Tag.of("node", node.getKey())),
             ).record<HttpResponse> {
                 runBlocking {
                     gatewayClient.request {
@@ -67,7 +68,7 @@ class RoutingController(private val service: DiscoveryService) {
                         this.url.set(null, node.ip, node.port, "/$path")
                         this.accept(
                             call.request.accept()?.let { it1 -> ContentType.parse(it1) }
-                                ?: ContentType.Application.Json
+                                ?: ContentType.Application.Json,
                         )
                     }
                 }

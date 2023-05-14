@@ -2,6 +2,7 @@ package pl.felis.multum.collection
 
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import pl.felis.multum.common.collection.RoundRobinMap
 import pl.felis.multum.domain.discovery.NodeStatus
 import pl.felis.multum.domain.discovery.ServiceNodeEntry
 

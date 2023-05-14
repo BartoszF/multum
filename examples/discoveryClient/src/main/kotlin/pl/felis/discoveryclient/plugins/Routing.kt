@@ -1,5 +1,6 @@
 package pl.felis.discoveryclient.plugins
 
+import io.ktor.client.call.*
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.statuspages.*
@@ -9,6 +10,7 @@ import io.ktor.server.routing.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
+import pl.felis.multum.client.MultumClient
 import java.net.InetAddress
 
 @Serializable
@@ -21,6 +23,9 @@ fun Application.configureRouting() {
             call.respondText(text = "500: $cause", status = HttpStatusCode.InternalServerError)
         }
     }
+
+    val multumClient = MultumClient(this)
+
     routing {
         get("/test") {
             call.respond(
@@ -29,9 +34,19 @@ fun Application.configureRouting() {
                     2137,
                     withContext(Dispatchers.IO) {
                         InetAddress.getLocalHost()
-                    }.hostName
-                )
+                    }.hostName,
+                ),
             )
+        }
+
+        get("/client") {
+            val response = multumClient.call("discovery-client") {
+                method = HttpMethod.Get
+                path = "/test"
+            }
+
+            call.response.status(response.status)
+            call.respondText(response.body(), response.contentType() ?: ContentType.Application.Json)
         }
     }
 }

@@ -11,12 +11,12 @@ class MultumPluginConfiguration(config: ApplicationConfig) {
     var heartbeatInterval: Long = config.tryGetString("discovery.heartbeatInSeconds")?.toLong() ?: 1L
 }
 
-val MultumPlugin = createApplicationPlugin(
-    "multum-client",
+val MultumDiscoveryPlugin = createApplicationPlugin(
+    "multum-discovery-client",
     "multum",
-    { config: ApplicationConfig -> MultumPluginConfiguration(config) }
+    { config: ApplicationConfig -> MultumPluginConfiguration(config) },
 ) {
-    val handler = MultumHandler(pluginConfig, application)
+    val handler = MultumDiscoveryHandler(pluginConfig, application)
 
     on(MonitoringEvent(ApplicationStarted)) { application ->
         handler.initialize()

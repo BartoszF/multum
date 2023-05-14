@@ -1,6 +1,5 @@
 package pl.felis.multum
 
-import io.ktor.network.tls.certificates.*
 import io.ktor.server.application.*
 import io.ktor.server.config.*
 import io.ktor.server.engine.*
@@ -48,7 +47,7 @@ fun ApplicationEngineEnvironmentBuilder.envConfig(args: Array<String>) {
             keyStore = SslSettings.getKeyStore(),
             sslKeyAlias,
             { (sslKeyStorePassword ?: "").toCharArray() },
-            { (sslPrivateKeyPassword ?: "").toCharArray() }
+            { (sslPrivateKeyPassword ?: "").toCharArray() },
         ) {
             this.host = host
             this.port = sslPort.toInt()
