@@ -78,6 +78,7 @@ dependencies {
 
     implementation(project(":modules:multum-common"))
     implementation("io.ktor:ktor-server-cors-jvm:2.2.4")
+    implementation("io.ktor:ktor-client-encoding:2.2.4")
 
     testImplementation("io.ktor:ktor-server-tests-jvm:$ktor_version")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")

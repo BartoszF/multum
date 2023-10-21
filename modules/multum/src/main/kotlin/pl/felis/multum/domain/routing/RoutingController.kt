@@ -1,8 +1,8 @@
 package pl.felis.multum.domain.routing
 
 import io.ktor.client.*
-import io.ktor.client.call.*
 import io.ktor.client.engine.java.*
+import io.ktor.client.plugins.compression.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -11,6 +11,7 @@ import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
+import io.ktor.util.*
 import io.micrometer.core.instrument.Tag
 import io.micrometer.core.instrument.Tags
 import kotlinx.coroutines.runBlocking
@@ -32,13 +33,30 @@ val gatewayClient = HttpClient(Java) {
     install(ContentNegotiation) {
         json()
     }
+    install(ContentEncoding) {
+        deflate(1.0F)
+        gzip(0.9F)
+    }
+}
+
+fun Headers.appendFiltered(block: (Map.Entry<String, List<String>>) -> Unit) {
+    this.toMap().filterKeys {
+        it.lowercase() !in listOf(
+            HttpHeaders.ContentType.lowercase(),
+            HttpHeaders.ContentLength.lowercase(),
+            HttpHeaders.TransferEncoding.lowercase(),
+            HttpHeaders.ContentEncoding.lowercase(),
+        )
+    }.forEach(block)
 }
 
 @Single
 class RoutingController(private val service: DiscoveryService) {
 
     suspend fun routeToNode(call: ApplicationCall) {
-        call.application.log.info("Handling call ${call.request.path()}, method ${call.request.httpMethod}, headers ${call.request.headers}")
+        call.application.log.info(
+            "Handling call ${call.request.path()}, method ${call.request.httpMethod}, headers ${call.request.headers.toMap()}",
+        )
 
         val (serviceName, path) = call.request.path().split("/", limit = 3).drop(1)
 
@@ -65,11 +83,18 @@ class RoutingController(private val service: DiscoveryService) {
                         this.method = method
                         if (!body.isNullOrEmpty()) setBody(body)
                         this.host = serviceName
+                        this.headers.apply {
+                            call.request.headers.appendFiltered {
+                                it.value.forEach { v ->
+                                    append(it.key, v)
+                                }
+                            }
+                        }
                         this.url.set(null, node.ip, node.port, "/$path")
-                        this.accept(
-                            call.request.accept()?.let { it1 -> ContentType.parse(it1) }
-                                ?: ContentType.Application.Json,
-                        )
+                        call.request.accept()?.split(", ")?.map { ContentType.parse(it) }?.forEach { this.accept(it) }
+                            ?: this.accept(ContentType.Application.Json)
+
+                        this.contentType(call.request.contentType())
                     }
                 }
             }
@@ -79,6 +104,16 @@ class RoutingController(private val service: DiscoveryService) {
             return
         }
 
-        call.respondText(response.body(), response.contentType() ?: ContentType.Application.Json)
+        call.application.log.info("Response type ${response.contentType()}")
+
+        response.headers.appendFiltered {
+            it.value.forEach { v ->
+                call.response.headers.append(it.key, v)
+            }
+        }
+
+        val responseBody = response.bodyAsText()
+
+        call.respondText(responseBody, response.contentType() ?: ContentType.Application.Json, response.status)
     }
 }
