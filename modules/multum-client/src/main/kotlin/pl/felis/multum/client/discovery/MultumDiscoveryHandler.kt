@@ -6,7 +6,7 @@ import io.ktor.server.application.*
 import io.ktor.server.config.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import pl.felis.multum.client.client
+import pl.felis.multum.client.getHttpClient
 import pl.felis.multum.common.MultumPaths
 import pl.felis.multum.common.dao.ByeData
 import pl.felis.multum.common.dao.HeartbeatData
@@ -30,6 +30,8 @@ class MultumDiscoveryHandler(config: MultumPluginConfiguration, private val appl
     private val serviceEndpoint = "$multumEndpoint/${MultumPaths.Service}/$serviceName"
 
     private var heartbeatTask: TimerTask? = null
+
+    private val client = application.getHttpClient()
 
     fun initialize() {
         if (servicePort == null) throw RuntimeException("No port defined for multum service or application not running with SSL.")
