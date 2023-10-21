@@ -46,6 +46,7 @@ fun Headers.appendFiltered(block: (Map.Entry<String, List<String>>) -> Unit) {
             HttpHeaders.ContentLength.lowercase(),
             HttpHeaders.TransferEncoding.lowercase(),
             HttpHeaders.ContentEncoding.lowercase(),
+            HttpHeaders.Upgrade.lowercase(),
         )
     }.forEach(block)
 }

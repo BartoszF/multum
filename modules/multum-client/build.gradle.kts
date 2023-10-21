@@ -15,6 +15,7 @@ dependencies {
     api("io.ktor:ktor-client-core:$ktor_version")
     implementation("io.ktor:ktor-server-core:$ktor_version")
     api("io.ktor:ktor-client-java:$ktor_version")
+    api("io.ktor:ktor-client-auth:$ktor_version")
     api("io.ktor:ktor-client-content-negotiation:$ktor_version")
     api("io.ktor:ktor-serialization-kotlinx-json:$ktor_version")
 
