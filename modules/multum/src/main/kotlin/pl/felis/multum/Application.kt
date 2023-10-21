@@ -19,6 +19,9 @@ object ConfigKeys {
     const val hostSslKeyAlias = "ktor.security.ssl.keyAlias"
     const val hostSslKeyStorePassword = "ktor.security.ssl.keyStorePassword"
     const val hostSslPrivateKeyPassword = "ktor.security.ssl.privateKeyPassword"
+
+    const val allowedHeaders = "multum.cors.allowHeaders"
+    const val discoveryPort = "multum.discovery.port"
 }
 
 fun main(args: Array<String>) { // = io.ktor.server.netty.EngineMain.main(args)
@@ -54,7 +57,7 @@ fun ApplicationEngineEnvironmentBuilder.envConfig(args: Array<String>) {
         }
     }
 
-    val multumDiscoveryPort = config.propertyOrNull("multum.discovery.port")?.getString()?.toInt() ?: 9091
+    val multumDiscoveryPort = config.propertyOrNull(ConfigKeys.discoveryPort)?.getString()?.toInt() ?: 9091
 
     connector {
         this.host = host

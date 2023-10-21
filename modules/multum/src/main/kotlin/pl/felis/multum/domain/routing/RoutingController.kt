@@ -38,7 +38,7 @@ val gatewayClient = HttpClient(Java) {
 class RoutingController(private val service: DiscoveryService) {
 
     suspend fun routeToNode(call: ApplicationCall) {
-        call.application.log.info("Handling service ${call.request.host()}, method ${call.request.httpMethod}, headers ${call.request.headers}")
+        call.application.log.info("Handling call ${call.request.path()}, method ${call.request.httpMethod}, headers ${call.request.headers}")
 
         val (serviceName, path) = call.request.path().split("/", limit = 3).drop(1)
 

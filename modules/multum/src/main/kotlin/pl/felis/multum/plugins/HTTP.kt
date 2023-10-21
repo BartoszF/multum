@@ -3,9 +3,12 @@ package pl.felis.multum.plugins
 import io.ktor.http.*
 import io.ktor.http.content.*
 import io.ktor.server.application.*
+import io.ktor.server.config.*
 import io.ktor.server.plugins.cachingheaders.*
 import io.ktor.server.plugins.compression.*
+import io.ktor.server.plugins.cors.routing.*
 import io.ktor.server.plugins.defaultheaders.*
+import pl.felis.multum.ConfigKeys
 
 fun Application.configureHTTP() {
     install(CachingHeaders) {
@@ -27,6 +30,25 @@ fun Application.configureHTTP() {
     }
     install(DefaultHeaders) {
         header("X-Engine", "Multum") // will send this header with each response
+    }
+
+    val allowedHeaders = environment.config.tryGetStringList(ConfigKeys.allowedHeaders)
+
+    install(CORS) {
+        allowCredentials = true
+        allowSameOrigin = true
+        allowMethod(HttpMethod.Options)
+        allowMethod(HttpMethod.Put)
+        allowMethod(HttpMethod.Get)
+        allowMethod(HttpMethod.Post)
+        allowMethod(HttpMethod.Patch)
+        allowMethod(HttpMethod.Delete)
+        allowHeader(HttpHeaders.ContentType)
+        allowHeader(HttpHeaders.Authorization)
+        allowedHeaders?.forEach {
+            allowHeader(it)
+        }
+        anyHost()
     }
 //    routing {
 //        openAPI(path = "openapi")

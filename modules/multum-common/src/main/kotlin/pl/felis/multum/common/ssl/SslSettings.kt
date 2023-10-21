@@ -12,7 +12,6 @@ object SslSettings {
         val keyStorePassword = "foobar".toCharArray()
         val keyStore: KeyStore = KeyStore.getInstance(KeyStore.getDefaultType())
         keyStore.load(keyStoreFile, keyStorePassword)
-        println(keyStore.aliases().toList().joinToString(", "))
         return keyStore
     }
 
