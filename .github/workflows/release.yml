@@ -21,16 +21,29 @@ jobs:
           cache: gradle
       - name: Gradle permission
         run: chmod +x ./gradlew
+      - name: Build common
+        run: ./gradlew :modules:multum-common:jar -Pversion=${{ env.ver }}
       - name: Build client
         run: ./gradlew :modules:multum-client:shadowJar -Pversion=${{ env.ver }}
-      - name: 'Upload backend artifact'
+      - name: 'Upload client artifact'
         uses: actions/upload-artifact@v3
         with:
           name: multum-client
           path: modules/multum-client/build/libs
           retention-days: 5
-      - name: Upload backend to release
+      - name: Upload client to release
         uses: svenstaro/upload-release-action@v2
         with:
           file: modules/multum-client/build/libs/multum-client-${{ env.ver }}-all.jar
           asset_name: multum-client-${{ env.ver }}.jar
+      - name: 'Upload common artifact'
+        uses: actions/upload-artifact@v3
+        with:
+          name: multum-client
+          path: modules/multum-common/build/libs
+          retention-days: 5
+      - name: Upload common to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          file: modules/multum-common/build/libs/multum-common-${{ env.ver }}.jar
+          asset_name: multum-common-${{ env.ver }}.jar
