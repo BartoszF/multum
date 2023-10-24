@@ -25,7 +25,7 @@ class DiscoveryController(private val service: DiscoveryService) {
         val ip = call.request.origin.remoteAddress
         val node = ServiceNodeEntryQuery(heartbeat.service.name, data.port, ip)
         service.heartbeat(node)
-        call.application.log.info("Heartbeat for ${node.getKey()}...")
+        call.application.log.debug("Heartbeat for ${node.getKey()}...")
         call.respondText("OK")
     }
 

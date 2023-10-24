@@ -25,7 +25,7 @@ class MultumDiscoveryHandler(config: MultumPluginConfiguration, private val appl
         config.port ?: application.environment.config.propertyOrNull("ktor.deployment.sslPort")?.getString()
             ?.toInt()
     private val hasPrometheusMetrics =
-        application.environment.config.tryGetString("multum.discovery.prometheus")?.toBoolean() ?: true
+        application.environment.config.tryGetString("multum.discovery.prometheus")?.toBoolean() ?: false
 
     private val serviceEndpoint = "$multumEndpoint/${MultumPaths.Service}/$serviceName"
 
@@ -63,29 +63,39 @@ class MultumDiscoveryHandler(config: MultumPluginConfiguration, private val appl
         runBlocking {
             application.log.debug("Multum heartbeat...")
             try {
-                client.post("$serviceEndpoint/${MultumPaths.Heartbeat}") {
+                val response = client.post("$serviceEndpoint/${MultumPaths.Heartbeat}") {
                     contentType(ContentType.Application.Json)
                     setBody(HeartbeatData(servicePort!!))
                 }
+
+                if (!response.status.isSuccess()) {
+                    application.log.error("Multum heartbeat failed. Will try to register again...")
+                    cancelHeartbeat()
+                    initialize()
+                }
             } catch (e: ConnectException) {
                 application.log.error("Lost connection to multum. Will try to register again...")
-                heartbeatTask?.cancel()
+                cancelHeartbeat()
                 initialize()
             } catch (e: Throwable) {
-                application.log.error("Multum heartbeat failed. Will retry in $heartbeatInterval seconds...")
+                application.log.error("Multum heartbeat failed. Will retry in $heartbeatInterval seconds...", e)
             }
         }
     }
 
-    fun dispose() {
+    private fun cancelHeartbeat() {
         heartbeatTask?.cancel()
+    }
+
+    fun dispose() {
+        cancelHeartbeat()
         runBlocking {
             application.log.debug("Say bye to multum...")
             client.post("$multumEndpoint/${MultumPaths.Service}/$serviceName/${MultumPaths.Bye}") {
                 contentType(ContentType.Application.Json)
                 setBody(ByeData(servicePort!!))
             }
-            application.log.info("Goodbye multum")
+            application.log.info("Goodbye multum.")
         }
     }
 }

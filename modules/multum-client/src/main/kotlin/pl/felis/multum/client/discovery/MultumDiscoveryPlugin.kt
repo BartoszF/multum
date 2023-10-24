@@ -23,7 +23,6 @@ val MultumDiscoveryPlugin = createApplicationPlugin(
     }
     on(MonitoringEvent(ApplicationStopped)) { application ->
         handler.dispose()
-        // Release resources and unsubscribe from events
         application.environment.monitor.unsubscribe(ApplicationStarted) {}
         application.environment.monitor.unsubscribe(ApplicationStopped) {}
     }
