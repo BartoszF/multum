@@ -3,7 +3,7 @@ package pl.felis.multum.common.collection
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 
-open class RoundRobinMap<K : Any, V : Any>() : ConcurrentHashMap<K, V>() {
+open class RoundRobinMap<K : Any, V : Any> : ConcurrentHashMap<K, V>() {
     protected var currentIndex = AtomicInteger(0)
     private var currentKeys = keys.toList()
 
@@ -15,7 +15,10 @@ open class RoundRobinMap<K : Any, V : Any>() : ConcurrentHashMap<K, V>() {
         return entry
     }
 
-    override fun put(key: K, value: V): V? {
+    override fun put(
+        key: K,
+        value: V,
+    ): V? {
         val v = super.put(key, value)
 
         currentKeys = keys.toList()
@@ -29,7 +32,10 @@ open class RoundRobinMap<K : Any, V : Any>() : ConcurrentHashMap<K, V>() {
         currentKeys = keys.toList()
     }
 
-    override fun putIfAbsent(key: K, value: V): V? {
+    override fun putIfAbsent(
+        key: K,
+        value: V,
+    ): V? {
         val v = super.putIfAbsent(key, value)
 
         currentKeys = keys.toList()
@@ -45,7 +51,10 @@ open class RoundRobinMap<K : Any, V : Any>() : ConcurrentHashMap<K, V>() {
         return v
     }
 
-    override fun remove(key: K, value: V): Boolean {
+    override fun remove(
+        key: K,
+        value: V,
+    ): Boolean {
         val result = super.remove(key, value)
 
         currentKeys = keys.toList()

@@ -27,7 +27,5 @@ object SslSettings {
         return sslContext
     }
 
-    fun getTrustManager(): X509TrustManager {
-        return getTrustManagerFactory()?.trustManagers?.first { it is X509TrustManager } as X509TrustManager
-    }
+    fun getTrustManager(): X509TrustManager = getTrustManagerFactory()?.trustManagers?.first { it is X509TrustManager } as X509TrustManager
 }

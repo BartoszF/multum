@@ -1,10 +1,11 @@
 val ktor_version: String by project
 
 plugins {
-    kotlin("jvm") version "1.8.10"
-    id("org.jetbrains.kotlin.plugin.serialization") version "1.8.10"
+    kotlin("jvm")
+    id("org.jetbrains.kotlin.plugin.serialization")
+    id("io.ktor.plugin")
     id("maven-publish")
-    id("com.github.johnrengelman.shadow") version "7.1.2"
+//    id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 repositories {
@@ -31,12 +32,12 @@ tasks.getByName<Test>("test") {
 
 val compileKotlin: org.jetbrains.kotlin.gradle.tasks.KotlinCompile by tasks
 compileKotlin.kotlinOptions {
-    jvmTarget = "11"
+    jvmTarget = "21"
 }
 
 val compileTestKotlin: org.jetbrains.kotlin.gradle.tasks.KotlinCompile by tasks
 compileTestKotlin.kotlinOptions {
-    jvmTarget = "11"
+    jvmTarget = "21"
 }
 
 publishing {

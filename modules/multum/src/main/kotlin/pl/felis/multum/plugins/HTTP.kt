@@ -29,10 +29,10 @@ fun Application.configureHTTP() {
         }
     }
     install(DefaultHeaders) {
-        header("X-Engine", "Multum") // will send this header with each response
+        header("X-Engine", "Multum")
     }
 
-    val allowedHeaders = environment.config.tryGetStringList(ConfigKeys.allowedHeaders)
+    val allowedHeaders = environment.config.tryGetStringList(ConfigKeys.ALLOWED_HEADERS)
 
     install(CORS) {
         allowCredentials = true

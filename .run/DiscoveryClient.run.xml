@@ -1,5 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="DiscoveryClient" type="JetRunConfigurationType">
+    <option name="ALTERNATIVE_JRE_PATH" value="openjdk-21" />
+    <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
     <option name="MAIN_CLASS_NAME" value="pl.felis.discoveryclient.ApplicationKt" />
     <module name="multum.examples.discoveryClient.main" />
     <shortenClasspath name="NONE" />

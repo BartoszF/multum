@@ -17,15 +17,22 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.schedule
 
-class MultumDiscoveryHandler(config: MultumPluginConfiguration, private val application: Application) {
+class MultumDiscoveryHandler(
+    config: MultumPluginConfiguration,
+    private val application: Application,
+) {
     private val multumEndpoint = config.endpoint
     private val serviceName = config.serviceName
     private val heartbeatInterval = config.heartbeatInterval
     private val servicePort =
-        config.port ?: application.environment.config.propertyOrNull("ktor.deployment.sslPort")?.getString()
+        config.port ?: application.environment.config
+            .propertyOrNull("ktor.deployment.sslPort")
+            ?.getString()
             ?.toInt()
     private val hasPrometheusMetrics =
-        application.environment.config.tryGetString("multum.discovery.prometheus")?.toBoolean() ?: false
+        application.environment.config
+            .tryGetString("multum.discovery.prometheus")
+            ?.toBoolean() ?: false
 
     private val serviceEndpoint = "$multumEndpoint/${MultumPaths.Service}/$serviceName"
 
@@ -46,9 +53,10 @@ class MultumDiscoveryHandler(config: MultumPluginConfiguration, private val appl
                     }
                     application.log.info("Succesfully registered in multum.")
                     val interval = TimeUnit.SECONDS.toMillis(heartbeatInterval)
-                    heartbeatTask = Timer("multumHeartbeat").schedule(interval, interval) {
-                        heartbeat()
-                    }
+                    heartbeatTask =
+                        Timer("multumHeartbeat").schedule(interval, interval) {
+                            heartbeat()
+                        }
 
                     break
                 } catch (e: Throwable) {
@@ -63,10 +71,11 @@ class MultumDiscoveryHandler(config: MultumPluginConfiguration, private val appl
         runBlocking {
             application.log.debug("Multum heartbeat...")
             try {
-                val response = client.post("$serviceEndpoint/${MultumPaths.Heartbeat}") {
-                    contentType(ContentType.Application.Json)
-                    setBody(HeartbeatData(servicePort!!))
-                }
+                val response =
+                    client.post("$serviceEndpoint/${MultumPaths.Heartbeat}") {
+                        contentType(ContentType.Application.Json)
+                        setBody(HeartbeatData(servicePort!!))
+                    }
 
                 if (!response.status.isSuccess()) {
                     application.log.error("Multum heartbeat failed. Will try to register again...")

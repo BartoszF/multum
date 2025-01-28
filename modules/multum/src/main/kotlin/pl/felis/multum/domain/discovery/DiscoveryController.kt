@@ -10,9 +10,13 @@ import pl.felis.multum.common.dao.HeartbeatData
 import pl.felis.multum.common.dao.RegisterData
 
 @Single
-class DiscoveryController(private val service: DiscoveryService) {
-
-    suspend fun register(register: ServiceResource.Service.Register, call: ApplicationCall) {
+class DiscoveryController(
+    private val service: DiscoveryService,
+) {
+    suspend fun register(
+        register: ServiceResource.Service.Register,
+        call: ApplicationCall,
+    ) {
         val data = call.receive<RegisterData>()
         val ip = call.request.origin.remoteAddress
         val node = service.register(ServiceNodeEntryQuery(register.service.name, data.port, ip), data)
@@ -20,7 +24,10 @@ class DiscoveryController(private val service: DiscoveryService) {
         call.respondText("OK")
     }
 
-    suspend fun heartbeat(heartbeat: ServiceResource.Service.Heartbeat, call: ApplicationCall) {
+    suspend fun heartbeat(
+        heartbeat: ServiceResource.Service.Heartbeat,
+        call: ApplicationCall,
+    ) {
         val data = call.receive<HeartbeatData>()
         val ip = call.request.origin.remoteAddress
         val node = ServiceNodeEntryQuery(heartbeat.service.name, data.port, ip)
@@ -33,11 +40,17 @@ class DiscoveryController(private val service: DiscoveryService) {
         call.respond(service.getServices())
     }
 
-    suspend fun getNodes(serviceName: String, call: ApplicationCall) {
+    suspend fun getNodes(
+        serviceName: String,
+        call: ApplicationCall,
+    ) {
         call.respond(service.getNodes(serviceName))
     }
 
-    suspend fun bye(serviceName: String, call: ApplicationCall) {
+    suspend fun bye(
+        serviceName: String,
+        call: ApplicationCall,
+    ) {
         val data = call.receive<ByeData>()
         val ip = call.request.origin.remoteAddress
         val node = ServiceNodeEntryQuery(serviceName, data.port, ip)

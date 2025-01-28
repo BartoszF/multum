@@ -7,9 +7,9 @@ val prometeus_version: String by project
 val tcnative_version: String by project
 
 plugins {
-    kotlin("jvm") version "1.8.10"
-    id("io.ktor.plugin") version "2.2.4"
-    id("org.jetbrains.kotlin.plugin.serialization") version "1.8.10"
+    kotlin("jvm") version "2.1.10"
+    id("io.ktor.plugin") version "3.0.3"
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.1.10"
 }
 
 group = "pl.felis"
@@ -27,28 +27,29 @@ repositories {
 }
 
 val osName = System.getProperty("os.name").toLowerCase()
-val tcnative_classifier = when {
-    osName.contains("win") -> "windows-x86_64"
-    osName.contains("linux") -> "linux-x86_64"
-    osName.contains("mac") -> "osx-x86_64"
-    else -> null
-}
+val tcnative_classifier =
+    when {
+        osName.contains("win") -> "windows-x86_64"
+        osName.contains("linux") -> "linux-x86_64"
+        osName.contains("mac") -> "osx-x86_64"
+        else -> null
+    }
 
 dependencies {
-    implementation("io.ktor:ktor-server-core-jvm:$ktor_version")
-    implementation("io.ktor:ktor-server-resources:$ktor_version")
-    implementation("io.ktor:ktor-server-host-common-jvm:$ktor_version")
-    implementation("io.ktor:ktor-server-status-pages-jvm:$ktor_version")
-    implementation("io.ktor:ktor-server-compression-jvm:$ktor_version")
-    implementation("io.ktor:ktor-server-call-logging-jvm:$ktor_version")
-    implementation("io.ktor:ktor-server-forwarded-header-jvm:$ktor_version")
-    implementation("io.ktor:ktor-server-call-id-jvm:$ktor_version")
-    implementation("io.ktor:ktor-server-metrics-micrometer-jvm:$ktor_version")
-    implementation("io.micrometer:micrometer-registry-prometheus:$prometeus_version")
-    implementation("io.ktor:ktor-server-content-negotiation-jvm:$ktor_version")
-    implementation("io.ktor:ktor-serialization-kotlinx-json-jvm:$ktor_version")
-    implementation("io.ktor:ktor-server-netty-jvm:$ktor_version")
+    implementation("io.ktor:ktor-server-core")
+    implementation("io.ktor:ktor-server-resources")
+    implementation("io.ktor:ktor-server-host-common")
+    implementation("io.ktor:ktor-server-status-pages")
+    implementation("io.ktor:ktor-server-compression")
+    implementation("io.ktor:ktor-server-call-logging")
+    implementation("io.ktor:ktor-server-forwarded-header")
+    implementation("io.ktor:ktor-server-call-id")
+    implementation("io.ktor:ktor-server-metrics-micrometer")
+    implementation("io.ktor:ktor-server-content-negotiation")
+    implementation("io.ktor:ktor-server-netty")
+    implementation("io.ktor:ktor-serialization-kotlinx-json")
     implementation("ch.qos.logback:logback-classic:$logback_version")
+    implementation("io.micrometer:micrometer-registry-prometheus:$prometeus_version")
 
     if (tcnative_classifier != null) {
         implementation("io.netty:netty-tcnative-boringssl-static:$tcnative_version:$tcnative_classifier")
@@ -59,7 +60,6 @@ dependencies {
     implementation(project(":modules:multum-client"))
 //    implementation("com.github.BartoszF.multum:multum-client:0.2.0")
 
-    testImplementation("io.ktor:ktor-server-tests-jvm:$ktor_version")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
 }
 
@@ -73,10 +73,10 @@ tasks {
 
 val compileKotlin: KotlinCompile by tasks
 compileKotlin.kotlinOptions {
-    jvmTarget = "11"
+    jvmTarget = "21"
 }
 
 val compileTestKotlin: KotlinCompile by tasks
 compileTestKotlin.kotlinOptions {
-    jvmTarget = "11"
+    jvmTarget = "21"
 }

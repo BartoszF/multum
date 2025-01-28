@@ -40,29 +40,43 @@ data class ServiceNodeEntry(
     var lastActivity: Instant = Clock.System.now(),
 ) {
     fun getKey(): String = "$name@$ip:$port"
+
     fun toQuery(): ServiceNodeEntryQuery = ServiceNodeEntryQuery(name, port, ip)
 }
 
 @Single
-class DiscoveryService(private val application: Application) { // TODO: This name...
+class DiscoveryService(
+    private val application: Application,
+) {
     private val serviceCache: Cache<String, StatusAwareServiceNodeRoundRobin> =
         Caffeine.newBuilder().recordStats().build()
     private val expiryTask: TimerTask
     private val expiryTime: Long =
-        application.environment.config.property("multum.discovery.expiryAfterSeconds").getString().toLong()
+        application.environment.config
+            .property("multum.discovery.expiryAfterSeconds")
+            .getString()
+            .toLong()
     private val removalTime: Long =
-        application.environment.config.property("multum.discovery.removeAfterSeconds").getString().toLong()
+        application.environment.config
+            .property("multum.discovery.removeAfterSeconds")
+            .getString()
+            .toLong()
 
     init {
-        expiryTask = Timer("serviceNodeExpiry").schedule(0, TimeUnit.SECONDS.toMillis(1)) {
-            invalidateNodes()
-        }
+        expiryTask =
+            Timer("serviceNodeExpiry").schedule(0, TimeUnit.SECONDS.toMillis(expiryTime)) {
+                invalidateNodes()
+            }
     }
 
-    fun register(entry: ServiceNodeEntryQuery, data: RegisterData): ServiceNodeEntry {
-        val service = serviceCache.get(entry.name) {
-            StatusAwareServiceNodeRoundRobin()
-        }
+    fun register(
+        entry: ServiceNodeEntryQuery,
+        data: RegisterData,
+    ): ServiceNodeEntry {
+        val service =
+            serviceCache.get(entry.name) {
+                StatusAwareServiceNodeRoundRobin()
+            }
 
         val node = ServiceNodeEntry(entry.name, entry.port, entry.ip, data.prometheusMetrics)
         service[entry.getKey()] = node
@@ -80,28 +94,24 @@ class DiscoveryService(private val application: Application) { // TODO: This nam
         }
     }
 
-    fun getServices(): List<String> {
-        return serviceCache.asMap().keys.toList()
-    }
+    fun getServices(): List<String> = serviceCache.asMap().keys.toList()
 
-    fun getServiceMap(): ConcurrentMap<String, StatusAwareServiceNodeRoundRobin>? {
-        return serviceCache.asMap()
-    }
+    fun getServiceMap(): ConcurrentMap<String, StatusAwareServiceNodeRoundRobin>? = serviceCache.asMap()
 
     fun serviceExists(name: String): Boolean {
         val map = serviceCache.getIfPresent(name)
         return map?.isNotEmpty() ?: false
     }
 
-    suspend fun roundRobinNodes(name: String): ServiceNodeEntry {
-        return serviceCache.getIfPresent(name)?.next() ?: throw RuntimeException("No registered nodes for $name")
-    }
+    suspend fun roundRobinNodes(name: String): ServiceNodeEntry =
+        serviceCache.getIfPresent(name)?.next() ?: throw RuntimeException("No registered nodes for $name")
 
-    fun getNodes(name: String): List<ServiceNodeEntry> {
-        return serviceCache.getIfPresent(name)?.values?.toList() ?: emptyList()
-    }
+    fun getNodes(name: String): List<ServiceNodeEntry> = serviceCache.getIfPresent(name)?.values?.toList() ?: emptyList()
 
-    fun setNodeAsInactive(node: ServiceNodeEntry, throwable: Throwable? = null) {
+    fun setNodeAsInactive(
+        node: ServiceNodeEntry,
+        throwable: Throwable? = null,
+    ) {
         node.status = NodeStatus.INACTIVE
         application.log.error("Service ${node.getKey()} no longer available", throwable)
     }

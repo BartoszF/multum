@@ -1,9 +1,9 @@
 val multumVersion: String by project
 
 plugins {
-    kotlin("jvm") version "1.8.10"
-//    id("io.ktor.plugin") version "2.2.4"
-    id("org.jetbrains.kotlin.plugin.serialization") version "1.8.10"
+    kotlin("jvm") version "2.1.10"
+    kotlin("plugin.serialization") version "2.1.10"
+    id("io.ktor.plugin") version "3.0.3"
     id("maven-publish")
 }
 

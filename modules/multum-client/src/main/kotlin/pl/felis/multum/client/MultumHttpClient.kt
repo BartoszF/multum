@@ -20,7 +20,6 @@ fun Application.getHttpClient(): io.ktor.client.HttpClient {
             config {
                 sslContext(SslSettings.getSslContext())
             }
-            threadsCount = 8
             pipelining = true
             protocolVersion = HttpClient.Version.HTTP_2
         }

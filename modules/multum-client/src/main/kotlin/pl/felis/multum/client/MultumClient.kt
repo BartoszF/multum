@@ -14,12 +14,17 @@ class MultumCallBuilder {
     var body: Any = EmptyContent
 }
 
-class MultumClient(private val application: Application) {
+class MultumClient(
+    private val application: Application,
+) {
     private val endpoint = application.environment.config.tryGetString("multum.discovery.endpoint")
 
     private val client = application.getHttpClient()
 
-    suspend fun call(serviceName: String, request: MultumCallBuilder.() -> Unit): HttpResponse {
+    suspend fun call(
+        serviceName: String,
+        request: MultumCallBuilder.() -> Unit,
+    ): HttpResponse {
         val details = MultumCallBuilder().apply(request)
         application.log.debug("Routing request to $serviceName${details.path} via multum.")
         return client.request("$endpoint/$serviceName${details.path}") {

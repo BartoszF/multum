@@ -18,15 +18,24 @@ import pl.felis.multum.util.apiPort
 @Resource("/${MultumPaths.Service}")
 class ServiceResource {
     @Resource("{name}")
-    data class Service(val name: String, val resource: ServiceResource = ServiceResource()) {
+    data class Service(
+        val name: String,
+        val resource: ServiceResource = ServiceResource(),
+    ) {
         @Resource(MultumPaths.Register)
-        data class Register(val service: Service)
+        data class Register(
+            val service: Service,
+        )
 
         @Resource(MultumPaths.Heartbeat)
-        class Heartbeat(val service: Service)
+        class Heartbeat(
+            val service: Service,
+        )
 
         @Resource(MultumPaths.Bye)
-        class Bye(val service: Service)
+        class Bye(
+            val service: Service,
+        )
     }
 }
 
